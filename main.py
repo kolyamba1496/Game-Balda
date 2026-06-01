@@ -218,3 +218,66 @@ class BaldaApp:
         self.button(menu_box, "Играть", self.show_modes, width=22, height=2).pack(pady=8)
         self.button(menu_box, "Правила", self.show_rules, width=22, height=2).pack(pady=8)
         self.button(menu_box, "Выход", self.root.destroy, width=22, height=2).pack(pady=8)
+        def show_modes(self):
+            self.clear()
+            frame = tk.Frame(self.root, padx=20, pady=20, bg=BG_COLOR)
+            frame.pack(expand=True, fill=tk.BOTH)
+            tk.Label(frame, text="Выбор режима игры", font=self.title_font, bg=BG_COLOR, fg=DARK_GREEN).pack(pady=20)
+            box = tk.LabelFrame(frame, text="Размер поля", padx=20, pady=20, bg=PANEL_COLOR, fg=DARK_GREEN,
+                                highlightbackground="#bbf7d0", highlightthickness=2)
+            box.pack(pady=20)
+            size_var = tk.IntVar(value=self.size)
+            for value in (5, 6, 7):
+                tk.Radiobutton(
+                    box,
+                    text=f"{value} x {value}",
+                    variable=size_var,
+                    value=value,
+                    bg=PANEL_COLOR,
+                    fg=BUTTON_TEXT,
+                    activebackground=PANEL_COLOR,
+                    selectcolor=BUTTON_COLOR,
+                    command=lambda v=size_var: self.set_size(v.get())
+                ).pack(anchor="w", pady=5)
+            bottom = tk.Frame(frame, bg=BG_COLOR)
+            bottom.pack(pady=20)
+            self.button(bottom, "Начать игру", self.start_game).grid(row=0, column=0, padx=10)
+            self.button(bottom, "Назад в меню", self.show_menu).grid(row=0, column=1, padx=10)
+
+        def set_size(self, value):
+            self.size = value
+
+        def start_game(self):
+            self.game = BaldaGame(self.size, self.dictionary)
+            self.show_game()
+
+        def show_game(self):
+            self.clear()
+            self.buttons = []
+            top = tk.Frame(self.root, padx=5, pady=5, bg=DARK_GREEN)
+            top.pack(fill=tk.X)
+            self.info_label = tk.Label(top, font=self.main_font, bg=DARK_GREEN, fg="white")
+            self.info_label.pack(side=tk.LEFT, padx=10)
+            self.button(top, "Правила игры", self.show_rules, width=13).pack(side=tk.RIGHT, padx=4)
+            self.button(top, "Выход в меню", self.confirm_exit, width=13).pack(side=tk.RIGHT, padx=4)
+            main = tk.Frame(self.root, padx=5, pady=5, bg=BG_COLOR)
+            main.pack(expand=True, fill=tk.BOTH)
+            self.create_left_panel(main)
+            self.create_right_panel(main)
+            self.create_center_panel(main)
+            self.refresh()
+
+        def create_left_panel(self, parent):
+            left = tk.Frame(parent, bg=BG_COLOR)
+            left.pack(side=tk.LEFT, fill=tk.Y, padx=4)
+            letter_box = tk.LabelFrame(left, text="Выбранная буква", padx=5, pady=5, bg=PANEL_COLOR, fg=DARK_GREEN,
+                                       highlightbackground="#bbf7d0", highlightthickness=1)
+            letter_box.pack(fill=tk.X, pady=4)
+            tk.Label(letter_box, textvariable=self.letter_var, font=self.big_font, width=4, bg=PANEL_COLOR,
+                     fg=ACCENT).pack()
+            self.button(letter_box, "Сбросить ход", self.cancel_turn, width=14).pack(pady=4)
+            self.action_box = tk.LabelFrame(left, text="Ход Игрока 1", padx=5, pady=5, bg=PANEL_COLOR, fg=DARK_GREEN,
+                                            highlightbackground="#bbf7d0", highlightthickness=1)
+            self.action_box.pack(fill=tk.X, pady=4)
+            self.button(self.action_box, "Подтвердить", self.submit_word, width=14).pack(fill=tk.X, pady=3)
+            self.button(self.action_box, "Пас", self.pass_turn, width=14).pack(fill=tk.X, pady=3)
