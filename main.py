@@ -281,3 +281,87 @@ class BaldaApp:
             self.action_box.pack(fill=tk.X, pady=4)
             self.button(self.action_box, "Подтвердить", self.submit_word, width=14).pack(fill=tk.X, pady=3)
             self.button(self.action_box, "Пас", self.pass_turn, width=14).pack(fill=tk.X, pady=3)
+
+            def create_right_panel(self, parent):
+                right = tk.Frame(parent, bg=BG_COLOR)
+                right.pack(side=tk.RIGHT, fill=tk.Y, padx=4)
+                score_box = tk.LabelFrame(right, text="Очки", padx=5, pady=5, bg=PANEL_COLOR, fg=DARK_GREEN,
+                                          highlightbackground="#bbf7d0", highlightthickness=1)
+                score_box.pack(fill=tk.X, pady=4)
+                self.score_label = tk.Label(score_box, font=self.big_font, bg=PANEL_COLOR, fg=ACCENT)
+                self.score_label.pack()
+                lists = tk.Frame(right, bg=BG_COLOR)
+                lists.pack(fill=tk.BOTH, expand=True)
+                self.list_p1 = self.create_word_list(lists, "Слова Игрока 1")
+                self.list_p2 = self.create_word_list(lists, "Слова Игрока 2")
+
+            def create_word_list(self, parent, title):
+                box = tk.LabelFrame(parent, text=title, padx=5, pady=5, bg=PANEL_COLOR, fg=DARK_GREEN,
+                                    highlightbackground="#bbf7d0", highlightthickness=1)
+                box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=2)
+                listbox = tk.Listbox(box, width=14, height=16, bg="#ffffff", fg=BUTTON_TEXT, relief="flat",
+                                     highlightthickness=1, highlightbackground="#bbf7d0")
+                listbox.pack(fill=tk.BOTH, expand=True)
+                return listbox
+
+            def create_center_panel(self, parent):
+                center = tk.Frame(parent, bg=BG_COLOR)
+                center.pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=5)
+                self.turn_label = tk.Label(center, text="Ходит Игрок 1", font=self.big_font, fg=DARK_GREEN, bg=BG_COLOR)
+                self.turn_label.pack(pady=3)
+                self.word_label = tk.Label(center, bg=BG_COLOR, fg=BUTTON_TEXT)
+                self.word_label.pack(pady=3)
+                tk.Label(center,
+                         text="Выбирайте буквы по порядку. Новую букву можно вставить в начало, середину или конец слова.",
+                         bg=BG_COLOR,
+                         fg=BUTTON_TEXT).pack(pady=2)
+                self.board_frame = tk.Frame(center, bg=BOARD_BORDER, padx=5, pady=5)
+                self.board_frame.pack(pady=8)
+                self.create_board()
+                keyboard = tk.LabelFrame(center, text="Экранная клавиатура", padx=5, pady=5, bg=PANEL_COLOR,
+                                         fg=DARK_GREEN, highlightbackground="#bbf7d0", highlightthickness=1)
+                keyboard.pack(pady=5)
+                self.create_keyboard(keyboard)
+
+            def create_board(self):
+                for r in range(self.game.size):
+                    row = []
+                    for c in range(self.game.size):
+                        btn = tk.Button(
+                            self.board_frame,
+                            text=self.game.board[r][c].upper(),
+                            width=3,
+                            height=1,
+                            font=self.big_font,
+                            bg=BOARD_FILLED if self.game.board[r][c] else BOARD_EMPTY,
+                            fg=BUTTON_TEXT,
+                            activebackground=BUTTON_HOVER,
+                            relief="solid",
+                            bd=1,
+                            highlightthickness=1,
+                            highlightbackground=BOARD_BORDER,
+                            highlightcolor=BOARD_BORDER,
+                            cursor="hand2",
+                            command=lambda rr=r, cc=c: self.click_cell(rr, cc)
+                        )
+                        btn.grid(row=r, column=c, padx=2, pady=2)
+                        row.append(btn)
+                    self.buttons.append(row)
+
+            def create_keyboard(self, parent):
+                for i, letter in enumerate(RUS_LETTERS):
+                    tk.Button(
+                        parent,
+                        text=letter,
+                        width=2,
+                        height=1,
+                        bg=BUTTON_COLOR,
+                        fg=BUTTON_TEXT,
+                        activebackground=BUTTON_HOVER,
+                        relief="solid",
+                        bd=1,
+                        highlightthickness=1,
+                        highlightbackground="#86efac",
+                        cursor="hand2",
+                        command=lambda l=letter: self.select_letter(l)
+                    ).grid(row=i // 11, column=i % 11, padx=1, pady=1)
