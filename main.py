@@ -365,3 +365,63 @@ class BaldaApp:
                         cursor="hand2",
                         command=lambda l=letter: self.select_letter(l)
                     ).grid(row=i // 11, column=i % 11, padx=1, pady=1)
+    def click_cell(self, r, c):
+        cell = (r, c)
+        if self.game.selected and self.game.selected[-1] == cell and self.game.new_cell is None:
+            self.game.selected.pop()
+            self.refresh()
+            return
+        if self.game.new_cell == cell:
+            if self.game.new_letter:
+                rr, cc = self.game.new_cell
+                self.game.board[rr][cc] = ""
+            self.game.new_cell = None
+            self.game.new_letter = None
+            self.game.new_index = None
+            self.letter_var.set("")
+            self.refresh()
+            return
+        if self.game.is_filled(r, c):
+            if self.game.new_cell is not None and self.game.new_letter is None:
+                messagebox.showwarning("Ошибка", "Сначала выберите букву на экранной клавиатуре.")
+                return
+            ok, msg = self.game.add_cell(r, c)
+        else:
+            ok, msg = self.game.choose_new_cell(r, c)
+        if not ok:
+            messagebox.showwarning("Ошибка", msg)
+        self.refresh()
+    def select_letter(self, letter):
+        ok, msg = self.game.set_letter(letter)
+        if not ok:
+            messagebox.showwarning("Ошибка", msg)
+            return
+        self.letter_var.set(letter)
+        self.refresh()
+    def submit_word(self):
+        ok, result = self.game.submit()
+        if not ok:
+            messagebox.showerror("Ошибка", result)
+            self.refresh()
+            return
+        messagebox.showinfo("Успех", f"Слово принято: {result}")
+        self.letter_var.set("")
+        self.refresh()
+        if self.game.is_finished():
+            self.finish_game()
+    def cancel_turn(self):
+        self.game.reset_turn()
+        self.letter_var.set("")
+        self.refresh()
+    def pass_turn(self):
+        self.game.pass_turn()
+        self.letter_var.set("")
+        self.refresh()
+        if self.game.is_finished():
+            self.finish_game()
+    def finish_game(self):
+        messagebox.showinfo("Игра окончена", self.game.winner_text())
+        self.show_menu()
+    def confirm_exit(self):
+        if messagebox.askyesno("Выход", "Вернуться в главное меню? Текущая партия будет завершена."):
+            self.show_menu()
