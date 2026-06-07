@@ -218,6 +218,7 @@ class BaldaApp:
         self.button(menu_box, "Играть", self.show_modes, width=22, height=2).pack(pady=8)
         self.button(menu_box, "Правила", self.show_rules, width=22, height=2).pack(pady=8)
         self.button(menu_box, "Выход", self.root.destroy, width=22, height=2).pack(pady=8)
+
         def show_modes(self):
             self.clear()
             frame = tk.Frame(self.root, padx=20, pady=20, bg=BG_COLOR)
