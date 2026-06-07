@@ -425,3 +425,59 @@ class BaldaApp:
     def confirm_exit(self):
         if messagebox.askyesno("Выход", "Вернуться в главное меню? Текущая партия будет завершена."):
             self.show_menu()
+    def refresh(self):
+                if not self.game:
+                    return
+                player = self.game.current_player
+                self.info_label.config(text=f"Игрок {player} | Поле: {self.game.size}x{self.game.size}")
+                self.turn_label.config(text=f"Ходит Игрок {player}")
+                self.action_box.config(text=f"Ход Игрока {player}")
+                self.score_label.config(text=f"{self.game.scores[1]} : {self.game.scores[2]}")
+                self.word_label.config(text=f"Текущее слово: {self.game.current_word()}")
+                self.update_word_lists()
+                self.update_board()
+
+            def update_word_lists(self):
+                self.list_p1.delete(0, tk.END)
+                self.list_p2.delete(0, tk.END)
+                for word in self.game.player_words[1]:
+                    self.list_p1.insert(tk.END, word)
+                for word in self.game.player_words[2]:
+                    self.list_p2.insert(tk.END, word)
+
+            def update_board(self):
+                selected = set(self.game.selected)
+                new_cell = self.game.new_cell
+                for r in range(self.game.size):
+                    for c in range(self.game.size):
+                        btn = self.buttons[r][c]
+                        btn.config(text=self.game.board[r][c].upper())
+                        if self.game.is_empty(r, c):
+                            color = BOARD_EMPTY
+                        else:
+                            color = BOARD_FILLED
+                        if (r, c) in selected:
+                            color = BOARD_SELECTED
+                        if (r, c) == new_cell:
+                            color = BOARD_NEW
+                        btn.config(bg=color)
+
+            def show_rules(self):
+                rules = (
+                    "ПРАВИЛА ИГРЫ «БАЛДА»\n\n"
+                    "1. В центре поля находится стартовое слово.\n"
+                    "2. Игрок составляет слово, выбирая клетки по порядку.\n"
+                    "3. За ход нужно добавить одну новую букву на пустую клетку.\n"
+                    "4. Новую букву можно вставить в начало, середину или конец слова.\n"
+                    "5. Клетки должны соседствовать по вертикали или горизонтали.\n"
+                    "6. Слово должно быть в словаре и не должно повторяться.\n"
+                    "7. Очки начисляются по количеству букв.\n"
+                    "8. Игра заканчивается, когда поле заполнено или оба игрока подряд пасуют."
+                )
+                messagebox.showinfo("Правила игры", rules)
+
+            def run(self):
+                self.root.mainloop()
+        if __name__ == "__main__":
+            app = BaldaApp()
+            app.run()
