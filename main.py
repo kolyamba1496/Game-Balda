@@ -28,7 +28,7 @@ def load_dictionary():
         return json.load(file)
 
 class BaldaGame:
-    def _init_(self, size, dictionary):
+    def __init__(self, size, dictionary):
         self.size = size
         self.dictionary = set(dictionary)
         self.board = [["" for _ in range(size)] for _ in range(size)]
@@ -190,7 +190,7 @@ class BaldaGame:
 
 class BaldaApp:
 
-    def _init_(self):
+    def __init__(self):
         self.root = tk.Tk()
         self.root.title("Балда")
         self.root.geometry(f"{WIDTH}x{HEIGHT}")
@@ -508,7 +508,7 @@ class BaldaApp:
 
     def run(self):
         self.root.mainloop()
-        
+
 if __name__ == "__main__":
     app = BaldaApp()
     app.run()
