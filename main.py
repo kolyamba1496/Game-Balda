@@ -4,6 +4,7 @@ import random
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import font as tkfont
+
 WIDTH, HEIGHT = 1100, 700
 MIN_W, MIN_H = 1000, 600
 BASE_DIR = os.path.dirname(__file__)
@@ -21,11 +22,13 @@ BOARD_FILLED = "#dcfce7"
 BOARD_SELECTED = "#bef264"
 BOARD_NEW = "#86efac"
 BOARD_BORDER = "#15803d"
+
 def load_dictionary():
     with open(DICT_FILE, "r", encoding="utf-8") as file:
         return json.load(file)
+
 class BaldaGame:
-    def __init__(self, size, dictionary):
+    def _init_(self, size, dictionary):
         self.size = size
         self.dictionary = set(dictionary)
         self.board = [["" for _ in range(size)] for _ in range(size)]
@@ -39,6 +42,7 @@ class BaldaGame:
         self.new_index = None
         self.pass_count = 0
         self.create_start_word()
+
     def create_start_word(self):
         words = [word for word in self.dictionary if len(word) == self.size]
         word = random.choice(words)
@@ -46,12 +50,16 @@ class BaldaGame:
         for col, letter in enumerate(word):
             self.board[row][col] = letter
         self.used_words.add(word)
+
     def is_empty(self, r, c):
         return self.board[r][c] == ""
+
     def is_filled(self, r, c):
         return self.board[r][c] != ""
+
     def is_near(self, a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1]) == 1
+
     def reset_turn(self):
         if self.new_cell and self.new_letter:
             r, c = self.new_cell
@@ -60,6 +68,7 @@ class BaldaGame:
         self.new_cell = None
         self.new_letter = None
         self.new_index = None
+
     def full_path(self):
         path = self.selected[:]
         if self.new_cell is not None:
@@ -68,11 +77,14 @@ class BaldaGame:
                 index = len(path)
             path.insert(index, self.new_cell)
         return path
+
     def current_word(self):
         return "".join(self.board[r][c] for r, c in self.full_path()).lower()
+
     def last_cell(self):
         path = self.full_path()
         return path[-1] if path else None
+
     def can_add_cell(self, r, c):
         cell = (r, c)
         if not self.is_filled(r, c):
@@ -85,11 +97,13 @@ class BaldaGame:
             return True
         last = self.last_cell()
         return last is None or self.is_near(cell, last)
+
     def add_cell(self, r, c):
         if not self.can_add_cell(r, c):
             return False, "Выберите соседнюю клетку."
         self.selected.append((r, c))
         return True, "Клетка добавлена."
+
     def can_choose_new_cell(self, r, c):
         if self.new_cell is not None:
             return False
@@ -99,12 +113,14 @@ class BaldaGame:
             return True
         last = self.last_cell()
         return last is None or self.is_near((r, c), last)
+
     def choose_new_cell(self, r, c):
         if not self.can_choose_new_cell(r, c):
             return False, "Новая клетка должна быть пустой и соседней."
         self.new_cell = (r, c)
         self.new_index = len(self.selected)
         return True, "Новая клетка выбрана."
+
     def set_letter(self, letter):
         if self.new_cell is None:
             return False, "Сначала выберите пустую клетку."
@@ -115,6 +131,7 @@ class BaldaGame:
         r, c = self.new_cell
         self.board[r][c] = self.new_letter
         return True, "Буква поставлена."
+
     def check_word(self):
         if self.new_cell is None:
             return False, "Сначала выберите пустую клетку."
@@ -130,6 +147,7 @@ class BaldaGame:
         if word not in self.dictionary:
             return False, "Слова нет в словаре."
         return True, word
+
     def submit(self):
         ok, result = self.check_word()
         if not ok:
@@ -146,16 +164,21 @@ class BaldaGame:
         self.pass_count = 0
         self.change_player()
         return True, word
+
     def pass_turn(self):
         self.reset_turn()
         self.pass_count += 1
         self.change_player()
+
     def change_player(self):
         self.current_player = 2 if self.current_player == 1 else 1
+
     def board_is_full(self):
         return all(all(cell != "" for cell in row) for row in self.board)
+
     def is_finished(self):
         return self.board_is_full() or self.pass_count >= 2
+
     def winner_text(self):
         s1 = self.scores[1]
         s2 = self.scores[2]
@@ -164,8 +187,10 @@ class BaldaGame:
         if s2 > s1:
             return f"Победил Игрок 2\nСчёт: {s1} : {s2}"
         return f"Ничья\nСчёт: {s1} : {s2}"
+
 class BaldaApp:
-    def __init__(self):
+
+    def _init_(self):
         self.root = tk.Tk()
         self.root.title("Балда")
         self.root.geometry(f"{WIDTH}x{HEIGHT}")
@@ -182,14 +207,17 @@ class BaldaApp:
         self.buttons = []
         self.letter_var = tk.StringVar(value="")
         self.show_menu()
+
     def resize_font(self, event=None):
         scale = min(self.root.winfo_width() / WIDTH, self.root.winfo_height() / HEIGHT)
         self.main_font.configure(size=max(8, min(12, int(10 * scale))))
         self.big_font.configure(size=max(12, min(18, int(16 * scale))))
         self.title_font.configure(size=max(18, min(28, int(24 * scale))))
+
     def clear(self):
         for widget in self.root.winfo_children():
             widget.destroy()
+
     def button(self, parent, text, command, width=18, height=1):
         return tk.Button(
             parent,
@@ -206,6 +234,7 @@ class BaldaApp:
             font=self.main_font,
             bd=0
         )
+
     def show_menu(self):
         self.clear()
         frame = tk.Frame(self.root, padx=20, pady=20, bg=BG_COLOR)
@@ -218,6 +247,7 @@ class BaldaApp:
         self.button(menu_box, "Играть", self.show_modes, width=22, height=2).pack(pady=8)
         self.button(menu_box, "Правила", self.show_rules, width=22, height=2).pack(pady=8)
         self.button(menu_box, "Выход", self.root.destroy, width=22, height=2).pack(pady=8)
+
     def show_modes(self):
         self.clear()
         frame = tk.Frame(self.root, padx=20, pady=20, bg=BG_COLOR)
@@ -242,11 +272,14 @@ class BaldaApp:
         bottom.pack(pady=20)
         self.button(bottom, "Начать игру", self.start_game).grid(row=0, column=0, padx=10)
         self.button(bottom, "Назад в меню", self.show_menu).grid(row=0, column=1, padx=10)
+
     def set_size(self, value):
         self.size = value
+
     def start_game(self):
         self.game = BaldaGame(self.size, self.dictionary)
         self.show_game()
+
     def show_game(self):
         self.clear()
         self.buttons = []
@@ -262,6 +295,7 @@ class BaldaApp:
         self.create_right_panel(main)
         self.create_center_panel(main)
         self.refresh()
+
     def create_left_panel(self, parent):
         left = tk.Frame(parent, bg=BG_COLOR)
         left.pack(side=tk.LEFT, fill=tk.Y, padx=4)
@@ -273,6 +307,7 @@ class BaldaApp:
         self.action_box.pack(fill=tk.X, pady=4)
         self.button(self.action_box, "Подтвердить", self.submit_word, width=14).pack(fill=tk.X, pady=3)
         self.button(self.action_box, "Пас", self.pass_turn, width=14).pack(fill=tk.X, pady=3)
+
     def create_right_panel(self, parent):
         right = tk.Frame(parent, bg=BG_COLOR)
         right.pack(side=tk.RIGHT, fill=tk.Y, padx=4)
@@ -284,12 +319,14 @@ class BaldaApp:
         lists.pack(fill=tk.BOTH, expand=True)
         self.list_p1 = self.create_word_list(lists, "Слова Игрока 1")
         self.list_p2 = self.create_word_list(lists, "Слова Игрока 2")
+
     def create_word_list(self, parent, title):
         box = tk.LabelFrame(parent,text=title,padx=5,pady=5,bg=PANEL_COLOR,fg=DARK_GREEN,highlightbackground="#bbf7d0",highlightthickness=1)
         box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=2)
         listbox = tk.Listbox(box,width=14,height=16,bg="#ffffff",fg=BUTTON_TEXT,relief="flat",highlightthickness=1,highlightbackground="#bbf7d0")
         listbox.pack(fill=tk.BOTH, expand=True)
         return listbox
+
     def create_center_panel(self, parent):
         center = tk.Frame(parent, bg=BG_COLOR)
         center.pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=5)
@@ -307,6 +344,7 @@ class BaldaApp:
         keyboard = tk.LabelFrame(center,text="Экранная клавиатура",padx=5,pady=5,bg=PANEL_COLOR,fg=DARK_GREEN,highlightbackground="#bbf7d0",highlightthickness=1)
         keyboard.pack(pady=5)
         self.create_keyboard(keyboard)
+
     def create_board(self):
         for r in range(self.game.size):
             row = []
@@ -331,6 +369,7 @@ class BaldaApp:
                 btn.grid(row=r, column=c, padx=2, pady=2)
                 row.append(btn)
             self.buttons.append(row)
+
     def create_keyboard(self, parent):
         for i, letter in enumerate(RUS_LETTERS):
             tk.Button(
@@ -348,6 +387,7 @@ class BaldaApp:
                 cursor="hand2",
                 command=lambda l=letter: self.select_letter(l)
             ).grid(row=i // 11, column=i % 11, padx=1, pady=1)
+
     def click_cell(self, r, c):
         cell = (r, c)
         if self.game.selected and self.game.selected[-1] == cell and self.game.new_cell is None:
@@ -374,6 +414,7 @@ class BaldaApp:
         if not ok:
             messagebox.showwarning("Ошибка", msg)
         self.refresh()
+
     def select_letter(self, letter):
         ok, msg = self.game.set_letter(letter)
         if not ok:
@@ -381,6 +422,7 @@ class BaldaApp:
             return
         self.letter_var.set(letter)
         self.refresh()
+
     def submit_word(self):
         ok, result = self.game.submit()
         if not ok:
@@ -392,22 +434,27 @@ class BaldaApp:
         self.refresh()
         if self.game.is_finished():
             self.finish_game()
+
     def cancel_turn(self):
         self.game.reset_turn()
         self.letter_var.set("")
         self.refresh()
+
     def pass_turn(self):
         self.game.pass_turn()
         self.letter_var.set("")
         self.refresh()
         if self.game.is_finished():
             self.finish_game()
+
     def finish_game(self):
         messagebox.showinfo("Игра окончена", self.game.winner_text())
         self.show_menu()
+
     def confirm_exit(self):
         if messagebox.askyesno("Выход", "Вернуться в главное меню? Текущая партия будет завершена."):
             self.show_menu()
+
     def refresh(self):
         if not self.game:
             return
@@ -419,6 +466,7 @@ class BaldaApp:
         self.word_label.config(text=f"Текущее слово: {self.game.current_word()}")
         self.update_word_lists()
         self.update_board()
+
     def update_word_lists(self):
         self.list_p1.delete(0, tk.END)
         self.list_p2.delete(0, tk.END)
@@ -426,6 +474,7 @@ class BaldaApp:
             self.list_p1.insert(tk.END, word)
         for word in self.game.player_words[2]:
             self.list_p2.insert(tk.END, word)
+
     def update_board(self):
         selected = set(self.game.selected)
         new_cell = self.game.new_cell
@@ -442,6 +491,7 @@ class BaldaApp:
                 if (r, c) == new_cell:
                     color = BOARD_NEW
                 btn.config(bg=color)
+
     def show_rules(self):
         rules = (
             "ПРАВИЛА ИГРЫ «БАЛДА»\n\n"
@@ -455,8 +505,10 @@ class BaldaApp:
             "8. Игра заканчивается, когда поле заполнено или оба игрока подряд пасуют."
         )
         messagebox.showinfo("Правила игры", rules)
+
     def run(self):
         self.root.mainloop()
+        
 if __name__ == "__main__":
     app = BaldaApp()
     app.run()
